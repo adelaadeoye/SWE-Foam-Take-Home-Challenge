@@ -10,7 +10,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { s3 } from "../AwsConfig";
+// import { s3 } from "../../../firebase-backend/functions/AwsConfig";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import {
@@ -26,9 +26,9 @@ import {
 } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
-
-export default function Gallery({ props }) {
-  const [open, setOpen] = useState(true);
+import axios from "axios"
+export default function Gallery() {
+  const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("All");
   const [numberPerPage, setNumberPerPage] = useState(6);
   const [imageUrl, setImageUrl] = useState([]);
@@ -42,26 +42,26 @@ export default function Gallery({ props }) {
       ? setFilter(event.target.value)
       : setNumberPerPage(event.target.value);
   };
-  useEffect(() => {
-    s3.listObjects(
-      {
-        Bucket: process.env.REACT_APP_BUCKET,
-      },
-      function (err, res) {
-        if (err) {
-          console.log(err);
-        } else {
-          setImageUrl(
-            // res.Contents.splice(0, 17).map((item,index) => {
-            res.Contents.map((item, index) => {
-              return { key: item.Key, status: "", id: index };
-            })
-          );
-          setOpen(false);
-        }
-      }
-    );
-  }, []);
+  // useEffect(() => {
+  //   // s3.listObjects(
+  //   //   {
+  //   //     Bucket: process.env.REACT_APP_BUCKET,
+  //   //   },
+  //   //   function (err, res) {
+  //   //     if (err) {
+  //   //       console.log(err);
+  //   //     } else {
+  //   //       setImageUrl(
+  //   //         // res.Contents.splice(0, 17).map((item,index) => {
+  //   //         res.Contents.map((item, index) => {
+  //   //           return { imageKey: item.Key, status: "", id: index,users:[] };
+  //   //         })
+  //   //       );
+  //   //       setOpen(false);
+  //   //     }
+  //   //   }
+  //   // );
+  // }, []);
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -87,7 +87,11 @@ export default function Gallery({ props }) {
 
   }
   }, [filter])
-  
+  const  apiCall=()=>{
+    axios.get("http://localhost:5000/swe-foam/us-central1/api/update").then((res)=>{
+      console.log(res)
+    }).catch(err =>console.log(err))
+  }
   return (
     <>
       <CssBaseline />
@@ -114,6 +118,7 @@ export default function Gallery({ props }) {
         </Paper>
         <Box sx={{ padding: "20px", marginTop: "60px" }}>
           {/* Make this Filter Component */}
+          <Button onClick={()=>apiCall()} color={"success"}> Click</Button>
           <FormControl
             sx={{
               m: 1,
@@ -162,17 +167,17 @@ export default function Gallery({ props }) {
             </Select>
           </FormControl>
           <Grid container spacing={2}>
-            {imageUrl
+            {!!open===false &&imageUrl.length>0&&imageUrl
               .slice((page - 1) * numberPerPage, page * numberPerPage)
               .map((image) => {
                 return (
-                  <Grid item xs={12} md={4} key={image.key}>
+                  <Grid item xs={12} md={4} key={image.imageKey}>
                     <Card sx={{ maxWidth: 350 }}>
                       <CardActionArea>
                         <CardMedia
                           component="img"
                           height="250"
-                          image={`https://${process.env.REACT_APP_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${image.key}`}
+                          image={`https://${process.env.REACT_APP_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${image.imageKey}`}
                           alt="green iguana"
                          
                         />
