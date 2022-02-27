@@ -1,39 +1,16 @@
 // import logo from "./logo.svg";
-import { Button,y } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { Button, } from "@mui/material";
 import "./App.css";
-import { s3 } from "./AwsConfig";
 import Grid from "@mui/material/Grid";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-
-import { styled } from '@mui/material/styles';
+import { createTheme, ThemeProvider,styled } from "@mui/material/styles";
 import { purple } from '@mui/material/colors';
-import { Link } from "react-router-dom";
+import { Link,  } from "react-router-dom";
 
 function App() {
   const theme = createTheme();
-  const [imageUrl, setImageUrl] = useState([]);
-  useEffect(() => {
-    s3.listObjects(
-      {
-        Bucket: process.env.REACT_APP_BUCKET,
-      },
-      function (err, res) {
-        if (err) {
-          console.log(err);
-        } else {
-          setImageUrl(
-            res.Contents.splice(0, 500).map((item) => {
-              return { key: item.Key, status: "" };
-            })
-          );
-        }
-      }
-    );
-  }, []);
-  // console.log("imageUrl", imageUrl);
-  //     src={`https://${process.env.REACT_APP_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${item.Key}?w=248&fit=crop&auto=format`}
-  const ColorButton = styled(Button)(({ theme }) => ({
+
+ const ColorButton = styled(Button)(({ theme }) => ({
     color: theme.palette.getContrastText(purple[500]),
     backgroundColor: purple[500],
     '&:hover': {
@@ -103,7 +80,7 @@ function App() {
             <h1 style={{ textAlign: "center" }}>
               We want to create a classification system with you
             </h1>
-            <Link to="/signin" style={{ textDecoration:"none"}}>
+            <Link to={localStorage.getItem("login")===true?"/signin":"/gallery"} style={{ textDecoration:"none"}}>
             <ColorButton>Get Started</ColorButton>
             </Link>
           </Grid>

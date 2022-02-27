@@ -11,7 +11,7 @@ import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Link } from "react-router-dom";
+import { useNavigate,useLocation,Link } from 'react-router-dom';
 
 function Copyright(props) {
   return (
@@ -34,14 +34,19 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignIn() {
+  let navigate = useNavigate();
+  let location = useLocation();
+  let from = location.state?.from?.pathname || '/gallery';
+
   const handleSubmit = (event) => {
+    localStorage.setItem('login', true)
     event.preventDefault();
+    console.log('from', from)
+    navigate(from, { replace: true });
+    
+
     const data = new FormData(event.currentTarget);
-    // eslint-disable-next-line no-console
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    
   };
 
   return (

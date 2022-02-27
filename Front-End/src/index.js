@@ -3,18 +3,31 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route
+} from "react-router-dom";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
+import Gallery from "./pages/Gallery";
+import RequireAuth from "./component/RequireAuth";
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<App />}/>
+        <Routes>
+          <Route path="/" element={<App />} />
           <Route path="signup" element={<SignUp />} />
           <Route path="signin" element={<SignIn />} />
-        {/* </Route> */}
-      </Routes>
+          <Route
+            path="gallery"
+            element={
+              <RequireAuth>
+                <Gallery />
+              </RequireAuth>
+            }
+          />
+        </Routes>
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById("root")
