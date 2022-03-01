@@ -46,7 +46,7 @@ export default function Gallery() {
   };
   useEffect(() => {
     axios
-      .get("https://us-central1-swe-foam.cloudfunctions.net/api/images")
+      .get("http://localhost:5000/swe-foam/us-central1/api/images")
       .then((res) => {
         setImageUrl(res.data.data);
         setUser(res.data.user);
@@ -98,7 +98,7 @@ export default function Gallery() {
     );
     axios
       .put(
-        `https://us-central1-swe-foam.cloudfunctions.net/api/images/${image.id}`,
+        `http://localhost:5000/swe-foam/us-central1/api/images/${image.id}`,
         newImage
       )
       .then((res) => {
