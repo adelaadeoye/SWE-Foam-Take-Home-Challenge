@@ -46,7 +46,7 @@ export default function Gallery() {
   };
   useEffect(() => {
     axios
-      .get("http://localhost:5000/swe-foam/us-central1/api/images")
+      .get("https://us-central1-swe-foam.cloudfunctions.net/api/images")
       .then((res) => {
         setImageUrl(res.data.data);
         setUser(res.data.user);
@@ -56,7 +56,7 @@ export default function Gallery() {
         localStorage.clear();
         navigate("/");
       });
-  });
+  },[]);
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -98,7 +98,7 @@ export default function Gallery() {
     );
     axios
       .put(
-        `http://localhost:5000/swe-foam/us-central1/api/images/${image.id}`,
+        `https://us-central1-swe-foam.cloudfunctions.net/api/images/${image.id}`,
         newImage
       )
       .then((res) => {
@@ -110,6 +110,7 @@ export default function Gallery() {
   };
 
   useEffect(() => {
+
     let arr = [];
 
     imageUrl.forEach((image, index) => {
