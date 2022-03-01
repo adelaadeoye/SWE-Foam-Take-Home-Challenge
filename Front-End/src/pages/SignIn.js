@@ -29,7 +29,7 @@ export default function SignIn() {
       password: data.get("password"),
     };
     axios
-      .post("http://localhost:5000/swe-foam/us-central1/api/login", credential)
+      .post("https://us-central1-swe-foam.cloudfunctions.net/api/login", credential)
       // .post("https://us-central1-swe-foam.cloudfunctions.net/api/login", credential)
       .then((res) => {
         localStorage.setItem("token", `Bearer ${res.data.token}`);

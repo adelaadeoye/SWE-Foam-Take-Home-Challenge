@@ -1,6 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -28,7 +27,7 @@ import axios from "axios";
 export default function Gallery() {
   const authToken = localStorage.getItem("token");
   axios.defaults.headers.common = { Authorization: `${authToken}` };
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [filter, setFilter] = useState("All");
   const [numberPerPage, setNumberPerPage] = useState(6);
   const [imageUrl, setImageUrl] = useState([]);
@@ -47,17 +46,17 @@ export default function Gallery() {
   };
   useEffect(() => {
     axios
-      .get("http://localhost:5000/swe-foam/us-central1/api/images")
-      // .get("https://us-central1-swe-foam.cloudfunctions.net/api/images")
+      .get("https://us-central1-swe-foam.cloudfunctions.net/api/images")
       .then((res) => {
         setImageUrl(res.data.data);
         setUser(res.data.user);
+        setOpen(false)
       })
       .catch((err) => {
         localStorage.clear();
         navigate("/");
       });
-  }, []);
+  });
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -99,10 +98,9 @@ export default function Gallery() {
     );
     axios
       .put(
-        `http://localhost:5000/swe-foam/us-central1/api/images/${image.id}`,
+        `https://us-central1-swe-foam.cloudfunctions.net/api/images/${image.id}`,
         newImage
       )
-      // .get("https://us-central1-swe-foam.cloudfunctions.net/api/images")
       .then((res) => {
         console.log("update successfully");
       })
@@ -140,7 +138,6 @@ export default function Gallery() {
     });
     return status;
   };
-  // console.log('filteredImage.length', filteredImage.length)
   const handleFilterChange = () => {
     return filter === "All" ? imageUrl : filteredImage;
   };
@@ -231,7 +228,7 @@ export default function Gallery() {
                           <CardMedia
                             component="img"
                             height="250"
-                            image={`https://${process.env.REACT_APP_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${image.imageKey}`}
+                            image={image.imageKey}
                             alt="green iguana"
                           />
                         </CardActionArea>

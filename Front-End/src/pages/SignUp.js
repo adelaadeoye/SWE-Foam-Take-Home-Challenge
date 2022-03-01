@@ -31,7 +31,7 @@ export default function SignUp() {
       lastName: data.get("lastName"),
     };
     axios
-      .post("http://localhost:5000/swe-foam/us-central1/api/signup", credential,)
+      .post("https://us-central1-swe-foam.cloudfunctions.net/api/signup", credential,)
       // .post("https://us-central1-swe-foam.cloudfunctions.net/api/signup", credential)
       .then((res) => {
         console.log('res', res)

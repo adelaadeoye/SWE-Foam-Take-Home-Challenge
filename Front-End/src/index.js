@@ -11,7 +11,7 @@ import {
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import Gallery from "./pages/Gallery";
-import RequireAuth from "./component/RequireAuth";
+import RequireAuth from "./utils/RequireAuth";
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>

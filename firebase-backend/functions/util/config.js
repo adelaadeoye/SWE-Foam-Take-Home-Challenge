@@ -1,5 +1,5 @@
 module.exports  = {
-    apiKey: "AIzaSyAfhJc58GC6nHvfMYmerCRqDO0gP1fGSjg",
+    apiKey: process.env.GOOGLE_API_KEY,
     authDomain: "swe-foam.firebaseapp.com",
     databaseURL: "https://swe-foam-default-rtdb.firebaseio.com",
     projectId: "swe-foam",

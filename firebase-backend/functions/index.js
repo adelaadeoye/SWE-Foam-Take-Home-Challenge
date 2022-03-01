@@ -11,7 +11,6 @@ const { getAllImages, classifyImage,createCollection } = require("./APIs/images"
 const { loginUser,signUpUser } = require("./APIs/users");
 
 app.get("/images",auth, getAllImages);
-app.get("/create", createCollection);
 app.put('/images/:imageId',auth, classifyImage);
 app.post("/login", loginUser);
 app.post("/signup", signUpUser);
