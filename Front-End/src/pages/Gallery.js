@@ -10,7 +10,6 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-// import { s3 } from "../../../firebase-backend/functions/AwsConfig";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import {
@@ -18,7 +17,6 @@ import {
   Grid,
   CardActionArea,
   CardActions,
-  Button,
   Radio,
   RadioGroup,
   FormControlLabel,
@@ -278,10 +276,10 @@ export default function Gallery() {
               position: "sticky",
               backgroundColor: "#fafafa",
               padding: "5px",
-              height: "50px",
               display: "flex",
               width: "100%",
-              marginTop:10,
+              marginTop:"10px",
+              marginBottom:"10px",
               justifyContent: "center",
               flexDirection: "row",
             }}

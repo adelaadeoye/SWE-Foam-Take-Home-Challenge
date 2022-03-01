@@ -1,5 +1,5 @@
 const { db } = require("../util/admin");
-// const { s3 } = require("../AwsConfig");
+// const { s3 } = requir../../AwsConfigfig");
 // const axios = require("axios");
 
 //  here i create the image collection into the firebase database by getting the images url from the aws bucket
