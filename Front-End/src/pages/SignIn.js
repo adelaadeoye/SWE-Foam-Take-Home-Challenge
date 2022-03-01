@@ -11,42 +11,31 @@ import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useNavigate,useLocation,Link } from 'react-router-dom';
-
-function Copyright(props) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      {/* <Link color="inherit" >
-        Your Website
-      </Link>{" "} */}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import axios from "axios";
 
 const theme = createTheme();
 
 export default function SignIn() {
   let navigate = useNavigate();
   let location = useLocation();
-  let from = location.state?.from?.pathname || '/gallery';
+  let from = location.state?.from?.pathname || "/gallery";
 
   const handleSubmit = (event) => {
-    localStorage.setItem('login', true)
     event.preventDefault();
-    console.log('from', from)
-    navigate(from, { replace: true });
-    
-
     const data = new FormData(event.currentTarget);
-    
+    let credential = {
+      email: data.get("email"),
+      password: data.get("password"),
+    };
+    axios
+      .post("http://localhost:5000/swe-foam/us-central1/api/login", credential)
+      // .post("https://us-central1-swe-foam.cloudfunctions.net/api/login", credential)
+      .then((res) => {
+        localStorage.setItem("token", `Bearer ${res.data.token}`);
+        navigate(from, { replace: true,state:"adela" });
+      })
+      .catch((err) => console.log("error", err));
   };
 
   return (
@@ -111,10 +100,7 @@ export default function SignIn() {
                 id="password"
                 autoComplete="current-password"
               />
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
+
               <Button
                 type="submit"
                 fullWidth
@@ -130,12 +116,11 @@ export default function SignIn() {
                   </Link> */}
                 </Grid>
                 <Grid item>
-                  <Link to="/signup" style={{ textDecoration:"none"}}>
+                  <Link to="/signup" style={{ textDecoration: "none" }}>
                     {"Don't have an account? Sign Up"}
                   </Link>
                 </Grid>
               </Grid>
-              <Copyright sx={{ mt: 5 }} />
             </Box>
           </Box>
         </Grid>

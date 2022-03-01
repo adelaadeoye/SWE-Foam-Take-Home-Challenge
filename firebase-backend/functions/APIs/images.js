@@ -40,8 +40,11 @@ exports.getAllImages = (request, response) => {
     .doc("imageCollection")
     .get()
     .then((data) => {
-      response.header("Access-Control-Allow-Origin", "*");
-      return response.json(data.data().data);
+      // console.log('request.user', data.data())
+      return response.json({
+        data: data.data().data,
+        user: { userID: request.user.user_id, email: request.user.email },
+      });
     })
     .catch((err) => {
       console.error(err);
@@ -50,52 +53,58 @@ exports.getAllImages = (request, response) => {
 };
 
 exports.classifyImage = (request, response) => {
+  // console.log(request.body)
+  let data = request.body;
   db.collection("images")
     .doc("imageCollection")
-    .get()
-    .then((result) => {
-      response.header("Access-Control-Allow-Origin", "*");
-      let data = result.data().data;
-      result.data().data.some((item) => {
-        if (item.id == 1) {
-          data[1] = {
-            id: 1,
-            imageKey:
-              "prod-exp13436-2020-01-08-at-15.01.15-sb6by9nohfpx416zeltkn4x3fi2h8mhzt5fzpuoxsdv23fx3o84bu7qjihakmwx5.png",
-            status: "",
-            users: [{ email: "addd@a.com", status: "Foaming"},{email: "addsdddd@a.com", status: "Foaming"}],
-          };
-          db.collection("images")
-            .doc("imageCollection")
-            .update({data})
-            .then((data) => {
-             return response.json({ message: "Updated successfully",data });
-            })
-            .catch((err) => {
-              console.error(err);
-              return response.status(500).json({
-                error: err.code,
-              });
-            });
-        }
-      });
+    .update({ data })
+    .then((data) => {
+      return response.json({ message: "Updated successfully", data });
     })
     .catch((err) => {
       console.error(err);
-      return response.status(500).json({ error: err.code });
+      return response.status(500).json({
+        error: err.code,
+      });
     });
-    exports.uploadImages = (request, response) => {
-        db.collection("images")
-          .doc("imageCollection")
-          .set({data})
-          .then((data) => {
-            return response.json({
-                message:"successful"
-            });
-          })
-          .catch((err) => {
-            console.error(err);
-            return response.status(500).json({ error: err.code });
-          });
-      };
 };
+
+// exports.classifyImage = (request, response) => {
+//   db.collection("images")
+//     .doc("imageCollection")
+//     .get()
+//     .then((result) => {
+//       let data = result.data().data;
+//       result.data().data.some((item) => {
+//         if (item.id == 1) {
+//           data[1] = {
+//             id: 1,
+//             imageKey:
+//               "prod-exp13436-2020-01-08-at-15.01.15-sb6by9nohfpx416zeltkn4x3fi2h8mhzt5fzpuoxsdv23fx3o84bu7qjihakmwx5.png",
+//             status: "",
+//             users: [
+//               { email: "addd@a.com", status: "Foaming" },
+//               { email: "addsdddd@a.com", status: "Foaming" },
+//             ],
+//           };
+//           db.collection("images")
+//             .doc("imageCollection")
+//             .update({ data })
+//             .then((data) => {
+//               return response.json({ message: "Updated successfully", data });
+//             })
+//             .catch((err) => {
+//               console.error(err);
+//               return response.status(500).json({
+//                 error: err.code,
+//               });
+//             });
+//         }
+//       });
+//     })
+//     .catch((err) => {
+//       console.error(err);
+//       return response.status(500).json({ error: err.code });
+//     });
+
+// };

@@ -11,20 +11,34 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
-import { Link } from "react-router-dom";
-
-
+import { useNavigate,useLocation,Link } from 'react-router-dom';
+import axios from "axios"
 const theme = createTheme();
 
 export default function SignUp() {
+  let navigate = useNavigate();
+  let location = useLocation();
+  let from = location.state?.from?.pathname || '/gallery';
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
-    console.log({
+    let credential = {
       email: data.get("email"),
       password: data.get("password"),
-    });
+      firstName: data.get("firstName"),
+      lastName: data.get("lastName"),
+    };
+    axios
+      .post("http://localhost:5000/swe-foam/us-central1/api/signup", credential,)
+      // .post("https://us-central1-swe-foam.cloudfunctions.net/api/signup", credential)
+      .then((res) => {
+        console.log('res', res)
+        localStorage.setItem("token", `Bearer ${res.data.token}`);
+        navigate(from, { replace: true });
+      })
+      .catch((err) => console.log("error",err))
   };
 
   return (
@@ -131,7 +145,7 @@ export default function SignUp() {
               </Button>
               <Grid container justifyContent="flex-end">
                 <Grid item>
-                    <Link to="/signin" style={{ textDecoration:"none"}}>
+                  <Link to="/signin" style={{ textDecoration: "none" }}>
                     Already have an account? Sign in
                   </Link>
                 </Grid>

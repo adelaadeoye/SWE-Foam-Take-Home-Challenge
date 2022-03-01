@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -26,13 +26,18 @@ import {
 } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
-import axios from "axios"
+import axios from "axios";
 export default function Gallery() {
+  const authToken = localStorage.getItem("token");
+  axios.defaults.headers.common = { Authorization: `${authToken}` };
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("All");
   const [numberPerPage, setNumberPerPage] = useState(6);
   const [imageUrl, setImageUrl] = useState([]);
+  const [filteredImage, setFilteredImage] = useState([]);
+  const [user, setUser] = useState("");
   let navigate = useNavigate();
+
   const [page, setPage] = React.useState(1);
   const pageChange = (event, value) => {
     setPage(value);
@@ -42,66 +47,116 @@ export default function Gallery() {
       ? setFilter(event.target.value)
       : setNumberPerPage(event.target.value);
   };
-  // useEffect(() => {
-  //   // s3.listObjects(
-  //   //   {
-  //   //     Bucket: process.env.REACT_APP_BUCKET,
-  //   //   },
-  //   //   function (err, res) {
-  //   //     if (err) {
-  //   //       console.log(err);
-  //   //     } else {
-  //   //       setImageUrl(
-  //   //         // res.Contents.splice(0, 17).map((item,index) => {
-  //   //         res.Contents.map((item, index) => {
-  //   //           return { imageKey: item.Key, status: "", id: index,users:[] };
-  //   //         })
-  //   //       );
-  //   //       setOpen(false);
-  //   //     }
-  //   //   }
-  //   // );
-  // }, []);
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/swe-foam/us-central1/api/images")
+      // .get("https://us-central1-swe-foam.cloudfunctions.net/api/images")
+      .then((res) => {
+        setImageUrl(res.data.data);
+        setUser(res.data.user);
+      })
+      .catch((err) => {
+        localStorage.clear();
+        navigate("/");
+      });
+  }, []);
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
   };
   const handleClassification = (event, image) => {
+    let newImage = imageUrl;
+    let allUsers = newImage[image.id].users;
+    if (
+      newImage[image.id].users.filter((e) => e.email === user.email).length > 0
+    ) {
+      let newUser = newImage[image.id].users.filter(
+        (e) => e.email === user.email
+      );
+      newUser[0].status = event.target.value;
+      const newUserIndex = allUsers.findIndex(
+        (item) => item.email === newUser[0].email
+      );
+      allUsers[newUserIndex] = newUser[0];
+      newImage[image.id] = {
+        id: image.id,
+        imageKey: image.imageKey,
+        users: allUsers,
+      };
+    } else {
+      allUsers.push({
+        email: user.email,
+        status: event.target.value,
+      });
+      newImage[image.id] = {
+        id: image.id,
+        imageKey: image.imageKey,
+        users: allUsers,
+      };
+    }
     setImageUrl(
-      imageUrl.map((el) =>
-        el.key === image.key ? { ...el, status: event.target.value } : el
-      )
+      newImage.map((item) => {
+        return item;
+      })
     );
+    axios
+      .put(
+        `http://localhost:5000/swe-foam/us-central1/api/images/${image.id}`,
+        newImage
+      )
+      // .get("https://us-central1-swe-foam.cloudfunctions.net/api/images")
+      .then((res) => {
+        console.log("update successfully");
+      })
+      .catch((err) => {
+        console.log("update error");
+      });
   };
- 
+
   useEffect(() => {
-  if(filter==="Foaming"){
-    setImageUrl(imageUrl.filter(image=>{return image.status==="Foaming"}) )
-  }
-  else if (filter==="Non-Foaming"){
-    setImageUrl(imageUrl.filter(image=>{return image.status==="Non-Foaming"}) )
+    let arr = [];
 
-  }
-  else if (filter==="Unclassified"){
-    setImageUrl(imageUrl.filter(image=>{return image.status==="Unclassified"}) )
+    imageUrl.forEach((image, index) => {
+      image.users.forEach((e) => {
+        if (e.email === user.email && e.status === filter) {
+          arr.push(image);
+        }
+      });
 
-  }
-  }, [filter])
-  const  apiCall=()=>{
-    axios.get("http://localhost:5000/swe-foam/us-central1/api/update").then((res)=>{
-      console.log(res)
-    }).catch(err =>console.log(err))
-  }
+      if (filter === "Unclassified") {
+        if (!image.users.filter((e) => e.email === user.email).length > 0) {
+          arr.push(image);
+        }
+      }
+    });
+    setFilteredImage(arr);
+    // console.log("count1,count2", arr.length);
+  }, [filter, imageUrl]);
+
+  const getImageClass = (image) => {
+    let status = "";
+    image.users.forEach((item) => {
+      if (item.email === user.email) {
+        return (status = item.status);
+      } else return status;
+    });
+    return status;
+  };
+  // console.log('filteredImage.length', filteredImage.length)
+  const handleFilterChange = () => {
+    return filter === "All" ? imageUrl : filteredImage;
+  };
   return (
     <>
       <CssBaseline />
       <Container fixed>
         <Paper
           sx={{
-            position: "fixed",
             top: 0,
             left: 0,
-            right: 0,
+            zIndex: 2,
+            position: "sticky",
+            backgroundColor: "#fafafa",
             padding: "5px",
             height: "50px",
             display: "flex",
@@ -116,9 +171,8 @@ export default function Gallery() {
             Logout
           </p>
         </Paper>
-        <Box sx={{ padding: "20px", marginTop: "60px" }}>
+        <Box sx={{ padding: "20px", marginTop: "10px",marginBottom:"5px" }}>
           {/* Make this Filter Component */}
-          <Button onClick={()=>apiCall()} color={"success"}> Click</Button>
           <FormControl
             sx={{
               m: 1,
@@ -167,70 +221,77 @@ export default function Gallery() {
             </Select>
           </FormControl>
           <Grid container spacing={2}>
-            {!!open===false &&imageUrl.length>0&&imageUrl
-              .slice((page - 1) * numberPerPage, page * numberPerPage)
-              .map((image) => {
-                return (
-                  <Grid item xs={12} md={4} key={image.imageKey}>
-                    <Card sx={{ maxWidth: 350 }}>
-                      <CardActionArea>
-                        <CardMedia
-                          component="img"
-                          height="250"
-                          image={`https://${process.env.REACT_APP_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${image.imageKey}`}
-                          alt="green iguana"
-                         
-                        />
-                      </CardActionArea>
-                      <CardActions>
-                        <FormControl>
-                          <FormLabel id="demo-row-radio-buttons-group-label">
-                            Image Classification
-                          </FormLabel>
-                          <RadioGroup
-                            row
-                            aria-labelledby="demo-row-radio-buttons-group-label"
-                            name="row-radio-buttons-group"
-                            value={image.status}
-                            onChange={(event) =>
-                              handleClassification(event, image)
-                            }
-                          >
-                            <FormControlLabel
-                              value="Foaming"
-                              control={<Radio color="success" />}
-                              label="Foaming"
-                            />
-                            <FormControlLabel
-                              value="Non-Foaming"
-                              control={<Radio color="secondary" />}
-                              label="Non-Foaming"
-                            />
-                          </RadioGroup>
-                        </FormControl>
-                      </CardActions>
-                    </Card>
-                  </Grid>
-                );
-              })}
+            {!!open === false &&
+              imageUrl.length > 0 &&
+              handleFilterChange()
+                .slice((page - 1) * numberPerPage, page * numberPerPage)
+                .map((image) => {
+                  return (
+                    <Grid item xs={12} md={4} sm={6} key={image.imageKey}>
+                      <Card sx={{ maxWidth: 350 }}>
+                        <CardActionArea>
+                          <CardMedia
+                            component="img"
+                            height="250"
+                            image={`https://${process.env.REACT_APP_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${image.imageKey}`}
+                            alt="green iguana"
+                          />
+                        </CardActionArea>
+                        <CardActions>
+                          <FormControl>
+                            <FormLabel id="demo-row-radio-buttons-group-label">
+                              Image Classification
+                            </FormLabel>
+                            <RadioGroup
+                              row
+                              aria-labelledby="demo-row-radio-buttons-group-label"
+                              name="row-radio-buttons-group"
+                              value={getImageClass(image)}
+                              onChange={(event) =>
+                                handleClassification(event, image)
+                              }
+                            >
+                              <FormControlLabel
+                                value="Foaming"
+                                control={<Radio color="success" />}
+                                label="Foaming"
+                              />
+                              <FormControlLabel
+                                value="Non-Foaming"
+                                control={<Radio color="secondary" />}
+                                label="Non-Foaming"
+                              />
+                            </RadioGroup>
+                          </FormControl>
+                        </CardActions>
+                      </Card>
+                    </Grid>
+                  );
+                })}
           </Grid>
           {/* Make this pagination Component */}
           <Box
             sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              position: "fixed",
-              bottom: 10,
+              bottom: 0,
               left: 0,
-              right: 0,
+              zIndex: 1,
+              position: "sticky",
+              backgroundColor: "#fafafa",
+              padding: "5px",
+              height: "50px",
+              display: "flex",
+              width: "100%",
+              marginTop:10,
+              justifyContent: "center",
+              flexDirection: "row",
             }}
           >
             <Stack spacing={2}>
               <Pagination
-                count={Math.ceil(imageUrl.length / numberPerPage)}
+                count={Math.ceil(handleFilterChange().length / numberPerPage)}
                 shape="rounded"
                 size="large"
+                color="primary"
                 defaultPage={1}
                 siblingCount={5}
                 boundaryCount={1}
